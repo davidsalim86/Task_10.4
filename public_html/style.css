@@ -1,0 +1,26 @@
+html {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+@keyframes fade-lift {
+    from {
+        opacity: 0;
+        transform: translate(0,20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(0,0);
+    }
+}
+
+.animated-title {
+    animation-name: fade-lift; 
+    animation-duration: 0.9s;
+    animation-timing-function: ease-out;
+    animation-delay: 0.2s;
+}

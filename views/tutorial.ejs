@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DS Quants</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <%- include('navbar') -%>
+
+        <div class="container">
+            <h1 class="text-center my-5">Secure User Authentication Tutorial</h1>
+            <p>
+                Hi <%= user.username %>!
+                    This page explains why bcrypt and sessions are used and shows how to implement them.
+            </p>
+
+            <h3>1. Implemented features</h3>
+            <ul class="mb-4">
+                <li><strong>Password hashing with bcrypt and salting</strong></li>
+                <small>Passwords are securely hashed using the bcrypt algorithm, which incorporates salting adding
+                    random data to each password before hashing.</small>
+                <li><strong>Session management with express session</strong></li>
+                <small>Express sessions manage user authentication state. After successful login, users receive a
+                    session identifier stored in an HTTP only cookie, preventing client side scripts from accessing
+                    sensitive information.</small>
+                <li><strong>Access controlled pages</strong></li>
+                <small>Routes are protected using middleware function that ensure only authenticated users can access
+                    specific pages</small>
+            </ul>
+
+            <h3>2. Key benefits</h3>
+            <ul class="mb-4">
+                <li><strong>Enhanced password security</strong></li>
+                <small>bcrypt's salting and hashing mechanisms make passwords extremely difficult for attackers to
+                    reverse engineer, significantly strengthening user account security.</small>
+                <li><strong>Secure session handling</strong></li>
+                <small>Users remain authenticated across all secure pages for a defined duration, after which
+                    they are automatically logged out, improving both convenience and security.</small>
+                <li><strong>Improved access control</strong></li>
+                <small>Prevent unauthorised access by ensuring users must be authenticated before viewing protected
+                    content.</small>
+            </ul>
+
+            <h3>3. Step-by-Step setup</h3>
+            <ol>
+                <li class="mb-4">
+                    <strong>Install required dependencies</strong><br>
+                    <pre><code>npm install express@4 express-session bcrypt</code></pre>
+                </li>
+
+                <li class="mb-4">
+                    <strong>Enable the session middleware</strong><br>
+                    <pre><code>app.use(session({<br>    secret: 'change-this-secret',   // used to sign the cookie so can't be faked<br>    resave: false,                  // don’t store if unchanged<br>    saveUninitialized: false,       // no empty sessions<br>    cookie: { httpOnly: true, maxAge: 3600000 }<br>}));       // httpOnly prevents JavaScript from reading the cookie's data, maxAge automatically logs out the session after an hour.</code></pre>
+                </li>
+
+                <li class="mb-4">
+                    <strong>Hash the password during registration</strong><br>
+                    <pre><code>const saltRounds = 10;<br>const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);</code></pre>
+                    <small>* higher saltRounds means more security but take longer to compute.</small>
+                </li>
+
+                <li class="mb-4">
+                    <strong>Verify the hash during login</strong><br>
+                    <pre><code>const verified = await bcrypt.compare(req.body.password, user.hashedPassword);</code></pre>
+                    <small>* compare() returns true if password provided matches the stored hashed password.</small>
+                </li>
+
+                <li class="mb-4">
+                    <strong>Create requireLogin function to protect routes</strong><br>
+                    <pre><code>function requireLogin(req,res,next){<br>    if(!req.session.user) {<br>        return res.redirect('/login');<br>    } else {<br>        next();}}</code></pre>
+                    <small>* attach this function to any route that need to be protected e.g. app.get('dashboard',
+                        requireLogin, …).</small>
+                </li>
+            </ol>
+
+            <p class="mb-4">
+                <strong> With these steps, your credentials are stored safely and private pages are protected.</strong>
+            </p>
+        </div>
