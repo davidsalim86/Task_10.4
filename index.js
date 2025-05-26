@@ -69,6 +69,8 @@ app.post('/register', async (req, res) => {         // this function always retu
 
     users.push({ username, hashedPassword });
 
+    console.log(users);
+
     res.send(`<h2>Thank you, registration complete.</h2>
     <br>
     <a href="/login">Back to login</a>
