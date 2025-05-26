@@ -20,10 +20,10 @@ app.use(morgan('common'));
 app.use(express.static('public_html'));
 app.use(express.urlencoded({ extended: true }));
 
-app.use(session({
+app.use(session({                   // options to configure session behaviour
     secret: 'your_secret_key',      // key for the server knows a session cookie is genuine
-    resave: false,
-    saveUninitialized: false,
+    resave: false,                  // only modified sessions are saved
+    saveUninitialized: false,       // no empty sessions
     cookie: {
         httpOnly: true,             // so JS can’t read it
         secure: false,              // for local development set to false so cookie is sent over both http and https, otherwise never reach server
@@ -61,11 +61,11 @@ app.get('/register', (req, res) => {
     res.render('register',{user: null})
 })
 
-app.post('/register', async (req, res) => {
+app.post('/register', async (req, res) => {         // this function always return promise 
     const username = req.body.username;
     const password = req.body.password;
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, saltRounds); // wait here until promise come back
 
     users.push({ username, hashedPassword });
 
@@ -95,7 +95,7 @@ app.post('/login', async (req, res) => {
             <a href="/login">Try again</a>`
         );
     }
-    req.session.user = { username };         // success login, store the login in the session and go to tutorial.html
+    req.session.user = { username };         // success login, store the login in the session and go to dashboard
     res.redirect('/dashboard');
 })
 
