@@ -56,27 +56,44 @@
                 </li>
 
                 <li class="mb-4">
+                    <strong>Set up server and dependencies</strong><br>
+                    <pre><code>const express = require('express');<br>const session = require('express-session');<br>const bcrypt = require('bcrypt');</code></pre>
+                </li>
+
+                <li class="mb-4">
                     <strong>Enable the session middleware</strong><br>
-                    <pre><code>app.use(session({<br>    secret: 'change-this-secret',   // used to sign the cookie so can't be faked<br>    resave: false,                  // don’t store if unchanged<br>    saveUninitialized: false,       // no empty sessions<br>    cookie: { httpOnly: true, maxAge: 3600000 }<br>}));       // httpOnly prevents JavaScript from reading the cookie's data, maxAge automatically logs out the session after an hour.</code></pre>
+                    <pre><code>app.use(session({<br>    secret: 'change-this-secret',   // key for server to know a session is genuine<br>    resave: false,                  // don’t store if unchanged<br>    saveUninitialized: false,       // no empty sessions<br>    cookie: { httpOnly: true, secure: false, maxAge: 3600000 }<br>}));   // httpOnly prevents JS from reading the cookie's data, secure set to false for development only, so cookie sent to both http and https,<br>       // maxAge automatically logs out the session after an hour.</code></pre>
                 </li>
 
                 <li class="mb-4">
                     <strong>Hash the password during registration</strong><br>
-                    <pre><code>const saltRounds = 10;<br>const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);</code></pre>
-                    <small>* higher saltRounds means more security but take longer to compute.</small>
+                    <pre><code>const saltRounds = 10;<br>const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);       // include await, so wait here until promise is returned</code></pre>
+                    <small>* higher saltRounds means more security but take longer to compute.<br>
+                         ** need to include async in the route e.g. app.post('/register', async (req, res) => ...)        // so this function always return promise
+                    </small>
                 </li>
 
                 <li class="mb-4">
                     <strong>Verify the hash during login</strong><br>
-                    <pre><code>const verified = await bcrypt.compare(req.body.password, user.hashedPassword);</code></pre>
+                    <pre><code>const user = users.find(u => u.username === username);                // to match username with stored username<br>const verified = await bcrypt.compare(req.body.password, user.hashedPassword);     //bcrypt match password with stored hashed password</code></pre>
                     <small>* compare() returns true if password provided matches the stored hashed password.</small>
+                </li>
+
+                <li class="mb-4">
+                    <strong>Set session user as verified username</strong><br>
+                    <pre><code>req.session.user = { username }</code></pre>
                 </li>
 
                 <li class="mb-4">
                     <strong>Create requireLogin function to protect routes</strong><br>
                     <pre><code>function requireLogin(req,res,next){<br>    if(!req.session.user) {<br>        return res.redirect('/login');<br>    } else {<br>        next();}}</code></pre>
                     <small>* attach this function to any route that need to be protected e.g. app.get('dashboard',
-                        requireLogin, …).</small>
+                        requireLogin, ...).</small>
+                </li>
+
+                <li class="mb-4">
+                    <strong>Create log out route to end the session</strong><br>
+                    <pre><code>app.get('/logout', (req, res) => {<br>    req.session.destroy(() => {<br>        res.redirect('/login');<br>    });<br>});</code></pre>
                 </li>
             </ol>
 
